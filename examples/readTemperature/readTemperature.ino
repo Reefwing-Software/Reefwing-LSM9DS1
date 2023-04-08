@@ -41,8 +41,8 @@ void loop() {
   //  Read chip temperature
   float temperature = 0.0;
   
-  if (imu.tempAvailable) {
-    temperature = imu.readTemperature();
+  if (imu.tempAvailable()) {
+    temperature = imu.readTemp();
   }
 
   //  Display sensor data every displayPeriod, non-blocking.

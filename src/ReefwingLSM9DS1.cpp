@@ -46,9 +46,9 @@ void ReefwingLSM9DS1::begin(TwoWire *wire) {
   setGyroScale(FS_245DPS);
   setAccelScale(FS_XL_2G);
   setMagScale(FS_4G);
-  setGyroBandwidth(LOW);
-  setGyroODR(ODR_238Hz);    //  NORMAL Op Mode, gyro rate = accel rate
-  setMagODR(ODR_10Hz);
+  setGyroBandwidth(LOWEST);
+  setGyroODR(GODR_238Hz);    //  NORMAL Op Mode, gyro rate = accel rate
+  setMagODR(MODR_10Hz);
 
   //  Flush the first 20 readings to allow for sensor turn on
   //  See Tables 11 and 12 in the LSM9DS1 Data Sheet
@@ -165,7 +165,7 @@ void ReefwingLSM9DS1::enableLowPower(bool bitValue) {
 
   if (bitValue) { //  Enable LOW POWER mode
     CTRL_REG3_G |= (0x01 << 7);
-    if (_config.gyroAccelOpMode == NORMAL && _config.gyro.sampleRate < ODR_238Hz) {
+    if (_config.gyroAccelOpMode == NORMAL && _config.gyro.sampleRate < GODR_238Hz) {
       _config.gyroAccelOpMode = LOW_POWER;
     }
   }
@@ -301,7 +301,7 @@ void ReefwingLSM9DS1::setSampleMode(MagSampleModes mode) {
   CTRL_REG3_M &= 0xFC;
 
   switch(mode) {
-    case MagSampleModes::POWERED_DOWN:      //  MD = 10 or MD = 11
+    case MagSampleModes::IDLE_OFF:          //  MD = 10 or MD = 11
       CTRL_REG3_M |= 0x02;
       break;
     case MagSampleModes::SINGLE_SHOT:       //  MD = 01
@@ -327,15 +327,15 @@ void ReefwingLSM9DS1::setMagOperatingMode(MagOpModes mode) {
   CTRL_REG4_M &= 0xF3;
 
   switch(mode) {
-    case MagOpModes::MEDIUM:  //  OM = 01 & OMZ = 01
+    case MagOpModes::MEDIUM:            //  OM = 01 & OMZ = 01
       CTRL_REG1_M |= (0x01 << 5);
       CTRL_REG4_M |= (0x01 << 2);
       break;
-    case MagOpModes::HIGH:    //  OM = 10 & OMZ = 10
+    case MagOpModes::HIGH_PERFORMANCE:  //  OM = 10 & OMZ = 10
       CTRL_REG1_M |= (0x02 << 5);
       CTRL_REG4_M |= (0x02 << 2);
       break;
-    case MagOpModes::ULTRA:   //  OM = 11 & OMZ = 11
+    case MagOpModes::ULTRA:             //  OM = 11 & OMZ = 11
       CTRL_REG1_M |= (0x03 << 5);
       CTRL_REG4_M |= (0x03 << 2);
       break;
@@ -442,7 +442,7 @@ void ReefwingLSM9DS1::setGyroODR(GyroODR rate) {
   _config.gyroAccelOpMode = NORMAL;
 
   switch(rate) {
-    case GyroODR::ODR_14_9Hz:   //  ODR_G = 001
+    case GyroODR::GODR_14_9Hz:   //  ODR_G = 001
       CTRL_REG1_G |= (0x01 << 5);
       if (_config.gyro.lowPowerEnabled) {
         _config.gyroAccelOpMode = LOW_POWER;
@@ -451,7 +451,7 @@ void ReefwingLSM9DS1::setGyroODR(GyroODR rate) {
         _config.accel.bandwidth = BW_408Hz;
       }
       break;
-    case GyroODR::ODR_59_5Hz:   //  ODR_G = 010
+    case GyroODR::GODR_59_5Hz:   //  ODR_G = 010
       CTRL_REG1_G |= (0x02 << 5);
       if (_config.gyro.lowPowerEnabled) {
         _config.gyroAccelOpMode = LOW_POWER;
@@ -460,7 +460,7 @@ void ReefwingLSM9DS1::setGyroODR(GyroODR rate) {
         _config.accel.bandwidth = BW_408Hz;
       }
       break;
-    case GyroODR::ODR_119Hz:   //  ODR_G = 011
+    case GyroODR::GODR_119Hz:   //  ODR_G = 011
       CTRL_REG1_G |= (0x03 << 5);
       if (_config.gyro.lowPowerEnabled) {
         _config.gyroAccelOpMode = LOW_POWER;
@@ -469,19 +469,19 @@ void ReefwingLSM9DS1::setGyroODR(GyroODR rate) {
         _config.accel.bandwidth = BW_50Hz;
       }
       break;
-    case GyroODR::ODR_238Hz:   //  ODR_G = 100
+    case GyroODR::GODR_238Hz:   //  ODR_G = 100
       CTRL_REG1_G |= (0x04 << 5);
       if (_config.accel.autoBandwidthEnable) {
         _config.accel.bandwidth = BW_105Hz;
       }
       break;
-    case GyroODR::ODR_476Hz:   //  ODR_G = 101
+    case GyroODR::GODR_476Hz:   //  ODR_G = 101
       CTRL_REG1_G |= (0x05 << 5);
       if (_config.accel.autoBandwidthEnable) {
         _config.accel.bandwidth = BW_211Hz;
       }
       break;
-    case GyroODR::ODR_952Hz:   //  ODR_G = 110
+    case GyroODR::GODR_952Hz:   //  ODR_G = 110
       CTRL_REG1_G |= (0x06 << 5);
       if (_config.accel.autoBandwidthEnable) {
         _config.accel.bandwidth = BW_408Hz;
@@ -489,7 +489,7 @@ void ReefwingLSM9DS1::setGyroODR(GyroODR rate) {
       break;
     default:  //  ODR_G = 000, default rate is power-down
       _config.gyro.powerDown = true;
-      _config.gyroAccelOpMode = ACCELEROMETER;
+      _config.gyroAccelOpMode = ACCELEROMETER_ONLY;
       if (_config.accel.powerDown) {
         _config.gyroAccelOpMode = POWERED_DOWN;
       }
@@ -497,7 +497,7 @@ void ReefwingLSM9DS1::setGyroODR(GyroODR rate) {
   }
 
   _config.gyro.sampleRate = rate;
-  if (_config.gyroAccelOpMode != ACCELEROMETER) {
+  if (_config.gyroAccelOpMode != ACCELEROMETER_ONLY) {
     _config.accel.sampleRate = rate;
   }
   writeByte(LSM9DS1AG_ADDRESS, LSM9DS1AG_CTRL_REG1_G, CTRL_REG1_G);
@@ -511,40 +511,40 @@ void ReefwingLSM9DS1::setAccelODR(AccelODR rate) {
   CTRL_REG6_XL &= 0x1F;
 
   _config.accel.powerDown = false;
-  _config.gyroAccelOpMode = ACCELEROMETER;
+  _config.gyroAccelOpMode = ACCELEROMETER_ONLY;
 
   switch(rate) {
-    case AccelODR::ODR_10Hz:  //  ODR_XL = 001
+    case AccelODR::AODR_10Hz:  //  ODR_XL = 001
       CTRL_REG6_XL |= (0x01 << 5);
       if (_config.accel.autoBandwidthEnable) {
         _config.accel.bandwidth = BW_408Hz;
       }
       break;
-    case AccelODR::ODR_50Hz:  //  ODR_XL = 010
+    case AccelODR::AODR_50Hz:  //  ODR_XL = 010
       CTRL_REG6_XL |= (0x02 << 5);
       if (_config.accel.autoBandwidthEnable) {
         _config.accel.bandwidth = BW_408Hz;
       }
       break;
-    case AccelODR::ODR_119Hz: //  ODR_XL = 011
+    case AccelODR::AODR_119Hz: //  ODR_XL = 011
       CTRL_REG6_XL |= (0x03 << 5);
       if (_config.accel.autoBandwidthEnable) {
         _config.accel.bandwidth = BW_50Hz;
       }
       break;
-    case AccelODR::ODR_238Hz: //  ODR_XL = 100
+    case AccelODR::AODR_238Hz: //  ODR_XL = 100
       CTRL_REG6_XL |= (0x04 << 5);
       if (_config.accel.autoBandwidthEnable) {
         _config.accel.bandwidth = BW_105Hz;
       }
       break;
-    case AccelODR::ODR_476Hz: //  ODR_XL = 101
+    case AccelODR::AODR_476Hz: //  ODR_XL = 101
       CTRL_REG6_XL |= (0x05 << 5);
       if (_config.accel.autoBandwidthEnable) {
         _config.accel.bandwidth = BW_211Hz;
       }
       break;
-    case AccelODR::ODR_952Hz: //  ODR_XL = 110
+    case AccelODR::AODR_952Hz: //  ODR_XL = 110
       CTRL_REG6_XL |= (0x06 << 5);
       if (_config.accel.autoBandwidthEnable) {
         _config.accel.bandwidth = BW_408Hz;
@@ -556,7 +556,7 @@ void ReefwingLSM9DS1::setAccelODR(AccelODR rate) {
       if (_config.gyro.powerDown) {
         _config.gyroAccelOpMode = POWERED_DOWN;
       }
-      else if (_config.gyro.lowPowerEnabled && _config.gyro.sampleRate < ODR_238Hz) {
+      else if (_config.gyro.lowPowerEnabled && _config.gyro.sampleRate < GODR_238Hz) {
         _config.gyroAccelOpMode = LOW_POWER;
       }
       break;
@@ -568,21 +568,21 @@ void ReefwingLSM9DS1::setAccelODR(AccelODR rate) {
 
 void ReefwingLSM9DS1::setMagODR(MagODR rate) {
 
-  if (rate > ODR_80Hz) {
+  if (rate > MODR_80Hz) {
     enableFastODR(true);
 
     switch(rate) {
-      case MagODR::ODR_155Hz:       //  OM = 11, mode = ULTRA
+      case MagODR::MODR_155Hz:       //  OM = 11, mode = ULTRA
         setMagOperatingMode(ULTRA);
         break;
-      case MagODR::ODR_300Hz:       //  OM = 10, mode = HIGH
-        setMagOperatingMode(HIGH);
+      case MagODR::MODR_300Hz:       //  OM = 10, mode = HIGH_PERFORMANCE
+        setMagOperatingMode(HIGH_PERFORMANCE);
         break;
-      case MagODR::ODR_560Hz:       //  OM = 01, mode = MEDIUM
+      case MagODR::MODR_560Hz:       //  OM = 01, mode = MEDIUM
         setMagOperatingMode(MEDIUM);
         break;
-      case MagODR::ODR_1000Hz:      //  OM = 00 (OM default), mode = LOW
-        setMagOperatingMode(LOW);
+      case MagODR::MODR_1000Hz:      //  OM = 00 (OM default), mode = LOW_PERFORMANCE
+        setMagOperatingMode(LOW_PERFORMANCE;
         break;
     }
   } 
@@ -596,25 +596,25 @@ void ReefwingLSM9DS1::setMagODR(MagODR rate) {
     CTRL_REG1_M &= 0xE3;
 
     switch(rate) {
-      case MagODR::ODR_1_25Hz:      //  DO = 001
+      case MagODR::MODR_1_25Hz:      //  DO = 001
         CTRL_REG1_M |= (0x01 << 2);
         break;
-      case MagODR::ODR_2_5Hz:       //  DO = 010
+      case MagODR::MODR_2_5Hz:       //  DO = 010
         CTRL_REG1_M |= (0x02 << 2);
         break;
-      case MagODR::ODR_5Hz:         //  DO = 011
+      case MagODR::MODR_5Hz:         //  DO = 011
         CTRL_REG1_M |= (0x03 << 2);
         break;
-      case MagODR::ODR_10Hz:        //  DO = 100
+      case MagODR::MODR_10Hz:        //  DO = 100
         CTRL_REG1_M |= (0x04 << 2);
         break;
-      case MagODR::ODR_20Hz:        //  DO = 101
+      case MagODR::MODR_20Hz:        //  DO = 101
         CTRL_REG1_M |= (0x05 << 2);
         break;
-      case MagODR::ODR_40Hz:        //  DO = 110
+      case MagODR::MODR_40Hz:        //  DO = 110
         CTRL_REG1_M |= (0x06 << 2);
         break;
-      case MagODR::ODR_80Hz:        //  DO = 111
+      case MagODR::MODR_80Hz:        //  DO = 111
         CTRL_REG1_M |= (0x07 << 2);
         break;
       default:
@@ -634,10 +634,10 @@ void ReefwingLSM9DS1::setGyroBandwidth(GyroBW bandwidth) {
   CTRL_REG1_G &= 0xFC;
 
   switch(bandwidth) {
-    case GyroBW::MEDIUM:    //  BW_G = 01
+    case GyroBW::MIDDLE:    //  BW_G = 01
       CTRL_REG1_G |= 0x01;
       break;
-    case GyroBW::HIGH:      //  BW_G = 10
+    case GyroBW::HIGHEST:   //  BW_G = 10
       CTRL_REG1_G |= 0x02;
       break;
     case GyroBW::MAXIMUM:   //  BW_G = 11

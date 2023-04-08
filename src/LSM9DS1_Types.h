@@ -73,7 +73,7 @@ enum class TempScale {
 //  Ref - LSM9DS1 Data Sheet, Figure 5, page 19
 enum GyroAccelOpModes {
   POWERED_DOWN = 0,
-  ACCELEROMETER,
+  ACCELEROMETER_ONLY,
   NORMAL,
   LOW_POWER
 };
@@ -81,13 +81,13 @@ enum GyroAccelOpModes {
 //  Available Magnetometer Operating Modes
 //  Ref - LSM9DS1 Data Sheet, Table 110, Page 63
 //  Set in CTRL_REG1_M (x and y axis) & CTRL_REG4_M (z axis)
-//  For LOW_POWER mode, the Low Power (LP) bit = 1, 
+//  For LOW_PERFORMANCE mode, the Low Power (LP) bit = 1, 
 //  in CTRL_REG3_M, and DO = 0.625 Hz
 enum MagOpModes {
-  LOW = 0,        //  OM = 00
-  MEDIUM,         //  OM = 01
-  HIGH,           //  OM = 10
-  ULTRA           //  OM = 11
+  LOW_PERFORMANCE = 0,  //  OM = 00
+  MEDIUM,               //  OM = 01
+  HIGH_PERFORMANCE,     //  OM = 10
+  ULTRA                 //  OM = 11
 };
 
 //  Available Magnetometer Sample Modes
@@ -96,7 +96,7 @@ enum MagOpModes {
 enum MagSampleModes {
   CONTINUOUS = 0, //  MD = 00
   SINGLE_SHOT,    //  MD = 01
-  POWERED_DOWN    //  MD = 10 or 11
+  IDLE_OFF        //  MD = 10 or 11
 };
 
 //  Allowable accelerometer full scale settings
@@ -128,42 +128,42 @@ enum MagScale {
 //  Allowable accelerometer sample rates
 //  Ref - LSM9DS1 Data Sheet, Table 68, Page 52
 enum AccelODR {  
-  ODR_PowerDown = 0,  //  ODR_XL = 000
-  ODR_10Hz,           //  ODR_XL = 001
-  ODR_50Hz,           //  ODR_XL = 010
-  ODR_119Hz,          //  ODR_XL = 011
-  ODR_238Hz,          //  ODR_XL = 100
-  ODR_476Hz,          //  ODR_XL = 101
-  ODR_952Hz           //  ODR_XL = 110
+  AODR_PowerDown = 0,  //  ODR_XL = 000
+  AODR_10Hz,           //  ODR_XL = 001
+  AODR_50Hz,           //  ODR_XL = 010
+  AODR_119Hz,          //  ODR_XL = 011
+  AODR_238Hz,          //  ODR_XL = 100
+  AODR_476Hz,          //  ODR_XL = 101
+  AODR_952Hz           //  ODR_XL = 110
 };
 
 //  Allowable gyroscope sample rates (ODR)
 //  Ref - LSM9DS1 Data Sheet, Tables 45 & 46, Page 45
 enum GyroODR {  
-  ODR_PowerDown = 0,  //  ODR_G = 000
-  ODR_14_9Hz,         //  ODR_G = 001
-  ODR_59_5Hz,         //  ODR_G = 010
-  ODR_119Hz,          //  ODR_G = 011
-  ODR_238Hz,          //  ODR_G = 100
-  ODR_476Hz,          //  ODR_G = 101
-  ODR_952Hz           //  ODR_G = 110
+  GODR_PowerDown = 0,  //  ODR_G = 000
+  GODR_14_9Hz,         //  ODR_G = 001
+  GODR_59_5Hz,         //  ODR_G = 010
+  GODR_119Hz,          //  ODR_G = 011
+  GODR_238Hz,          //  ODR_G = 100
+  GODR_476Hz,          //  ODR_G = 101
+  GODR_952Hz           //  ODR_G = 110
 };
 
 //  Allowable magnetometer sample rates
 //  Ref - LSM9DS1 Data Sheet, Table 111, Page 63
 enum MagODR {  
-  ODR_0_625Hz = 0,    //  DO = 000, FAST_ODR = 0
-  ODR_1_25Hz,         //  DO = 001
-  ODR_2_5Hz,          //  DO = 010
-  ODR_5Hz,            //  DO = 011
-  ODR_10Hz,           //  DO = 100
-  ODR_20Hz,           //  DO = 101
-  ODR_40Hz,           //  DO = 110
-  ODR_80Hz,           //  DO = 111
-  ODR_155Hz,          //  OM = 11,  FAST_ODR = 1
-  ODR_300Hz,          //  OM = 10
-  ODR_560Hz,          //  OM = 01
-  ODR_1000Hz          //  OM = 00
+  MODR_0_625Hz = 0,    //  DO = 000, FAST_ODR = 0
+  MODR_1_25Hz,         //  DO = 001
+  MODR_2_5Hz,          //  DO = 010
+  MODR_5Hz,            //  DO = 011
+  MODR_10Hz,           //  DO = 100
+  MODR_20Hz,           //  DO = 101
+  MODR_40Hz,           //  DO = 110
+  MODR_80Hz,           //  DO = 111
+  MODR_155Hz,          //  OM = 11,  FAST_ODR = 1
+  MODR_300Hz,          //  OM = 10
+  MODR_560Hz,          //  OM = 01
+  MODR_1000Hz          //  OM = 00
 };
 
 //  Allowable accelerometer anti-aliasing filter bandwidths
@@ -180,9 +180,9 @@ enum AccelBW {
 //  Ref - LSM9DS1 Data Sheet, Tables 45, 46 & 47, Pages 45 & 46
 //  BW_G is only applicable if Low Pass Filter 2 (LPF2) is active
 enum GyroBW {   
-  LOW = 0,      // BW_G = 00, 14 Hz at ODR = 238 Hz,  33 Hz at ODR = 952 Hz
-  MEDIUM,       // BW_G = 01, 29 Hz at ODR = 238 Hz,  40 Hz at ODR = 952 Hz
-  HIGH,         // BW_G = 10, 63 Hz at ODR = 238 Hz,  58 Hz at ODR = 952 Hz
+  LOWEST = 0,   // BW_G = 00, 14 Hz at ODR = 238 Hz,  33 Hz at ODR = 952 Hz
+  MIDDLE,       // BW_G = 01, 29 Hz at ODR = 238 Hz,  40 Hz at ODR = 952 Hz
+  HIGHEST,      // BW_G = 10, 63 Hz at ODR = 238 Hz,  58 Hz at ODR = 952 Hz
   MAXIMUM       // BW_G = 11, 78 Hz at ODR = 238 Hz, 100 Hz at ODR = 952 Hz
 };
 
@@ -304,7 +304,7 @@ struct MagTestResults {
   float magdx;
   float magdy;
   float magdz;
-}
+};
 
 struct SensorData {
   float ax, ay, az;
