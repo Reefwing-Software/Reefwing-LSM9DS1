@@ -1,0 +1,32 @@
+#######################################
+# IDE Map for Reefwing LSM9DS1
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+ReefwingLSM9DS1 KEYWORD1
+LSM9DS1 KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin  KEYWORD2
+start   KEYWORD2
+reset   KEYWORD2
+update  KEYWORD2
+rawData KEYWORD2
+selfTest    KEYWORD2
+connected   KEYWORD2
+whoAmI  KEYWORD2
+setODR  KEYWORD2
+readTemperature	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+NONE    LITERAL1
+LSM9DS1_WHO_AM_I    LITERAL1
