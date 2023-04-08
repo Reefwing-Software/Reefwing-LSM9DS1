@@ -869,17 +869,18 @@ BiasOffsets ReefwingLSM9DS1::averageMagOffsets() {
   }
 
   //  Flush the 1st sample
-  readMagRaw(mxr, myr, mzr);
+  readMagRaw();
 
   for (int i = 0; i < 5; i++) {
     while (!magAvailable()) {
       yield();
     }
 
-    readMagRaw(mxr, myr, mzr);
-    bias.x += mxr;
-    bias.y += myr;
-    bias.z += mzr;
+    RawData mag = readMagRaw();
+
+    bias.x += mag.rx;
+    bias.y += mag.ry;
+    bias.z += mag.rz;
   }
 
   //  Average the bias offsets
