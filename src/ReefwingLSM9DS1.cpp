@@ -36,7 +36,7 @@ void ReefwingLSM9DS1::reset() {
 
 void ReefwingLSM9DS1::begin(TwoWire *wire) {
   _wire = wire;
-  _wire.begin();
+  _wire->begin();
   reset();
 
   //  Default configuration
@@ -52,12 +52,10 @@ void ReefwingLSM9DS1::begin(TwoWire *wire) {
 
   //  Flush the first 20 readings to allow for sensor turn on
   //  See Tables 11 and 12 in the LSM9DS1 Data Sheet
-  uint16_t x, y, z;
-
   for (int ctr = 0; ctr < FLUSH_SAMPLES; ctr++) {
-    readGyroRaw(x, y, z);
-    readAccelRaw(x, y, z);
-    readMagRaw(x, y, z);
+    readGyroRaw();
+    readAccelRaw();
+    readMagRaw();
     delay(5);
   }
 }
@@ -100,9 +98,29 @@ bool ReefwingLSM9DS1::connected() {
 void ReefwingLSM9DS1::updateSensorData() {
   //  Updates the class SensorData structure if data is available
 
-  if (gyroAvailable())  {  readGyro(data.gx, data.gy, data.gz);  }
-  if (accelAvailable()) {  readAccel(data.ax, data.ay, data.az); }
-  if (magAvailable())   {  readMag(data.mx, data.my, data.mz);   }
+  if (gyroAvailable()) {  
+    ScaledData gyr = readGyro(); 
+
+    data.gx = gyr.sx;
+    data.gy = gyr.sy;
+    data.gz = gyr.sz; 
+  }
+
+  if (accelAvailable()) {  
+    ScaledData acc = readAccel(); 
+
+    data.ax = acc.sx;
+    data.ay = acc.sy;
+    data.az = acc.sz;
+  }
+
+  if (magAvailable()) {  
+    ScaledData mag = readMag();   
+
+    data.mx = mag.sx;
+    data.my = mag.sy;
+    data.mz = mag.sz;
+  }
 }
 
 /******************************************************************
@@ -171,7 +189,7 @@ void ReefwingLSM9DS1::enableLowPower(bool bitValue) {
   }
   else {
     if (_config.gyroAccelOpMode == LOW_POWER) {
-      _config.gyroAccelOpMode = NORMAL
+      _config.gyroAccelOpMode = NORMAL;
     }
   }
 
@@ -308,6 +326,7 @@ void ReefwingLSM9DS1::setSampleMode(MagSampleModes mode) {
       CTRL_REG3_M |= 0x01;
       break;
     default:                                //  MD = 00, Continuous
+      break;
   }
 
   _config.mag.sampleMode = mode;
@@ -498,7 +517,7 @@ void ReefwingLSM9DS1::setGyroODR(GyroODR rate) {
 
   _config.gyro.sampleRate = rate;
   if (_config.gyroAccelOpMode != ACCELEROMETER_ONLY) {
-    _config.accel.sampleRate = rate;
+    _config.accel.sampleRate = AODR_GYRO_VALUE;
   }
   writeByte(LSM9DS1AG_ADDRESS, LSM9DS1AG_CTRL_REG1_G, CTRL_REG1_G);
 }
@@ -550,6 +569,8 @@ void ReefwingLSM9DS1::setAccelODR(AccelODR rate) {
         _config.accel.bandwidth = BW_408Hz;
       }
       break;
+    case AccelODR::AODR_GYRO_VALUE:
+      //  If Op Mode = NORMAL, accel ODR = gyro ODR
     default:  //  ODR_XL = 000, default rate is power-down
       _config.accel.powerDown = true;
       _config.gyroAccelOpMode = NORMAL;
@@ -569,7 +590,7 @@ void ReefwingLSM9DS1::setAccelODR(AccelODR rate) {
 void ReefwingLSM9DS1::setMagODR(MagODR rate) {
 
   if (rate > MODR_80Hz) {
-    enableFastODR(true);
+    enableMagFastODR(true);
 
     switch(rate) {
       case MagODR::MODR_155Hz:       //  OM = 11, mode = ULTRA
@@ -582,12 +603,12 @@ void ReefwingLSM9DS1::setMagODR(MagODR rate) {
         setMagOperatingMode(MEDIUM);
         break;
       case MagODR::MODR_1000Hz:      //  OM = 00 (OM default), mode = LOW_PERFORMANCE
-        setMagOperatingMode(LOW_PERFORMANCE;
+        setMagOperatingMode(LOW_PERFORMANCE);
         break;
     }
   } 
   else {
-    enableFastODR(false);
+    enableMagFastODR(false);
 
     uint8_t CTRL_REG1_M = readByte(LSM9DS1M_ADDRESS, LSM9DS1M_CTRL_REG1_M);
 
@@ -670,6 +691,7 @@ void ReefwingLSM9DS1::setAccelBandwidth(AccelBW bandwidth) {
         CTRL_REG6_XL |= 0x01;
         break;
       default:                  //  BW_XL = 00, bandwidth = 408 Hz (default)
+        break;
     }
 
     _config.accel.bandwidth = bandwidth;
@@ -687,7 +709,7 @@ Configuration ReefwingLSM9DS1::getConfig() {
  * 
  ******************************************************************/
 
-void ReefwingLSM9DS1::setTempOffset(float offset = 25.0f) {
+void ReefwingLSM9DS1::setTempOffset(float offset) {
   _config.temp.offset = offset;
 }
 
@@ -705,12 +727,11 @@ BiasOffsets ReefwingLSM9DS1::calibrateGyro() {
 
   //  Average 32 zero-rate (bias offset) samples
   for (int i = 0; i < 32; i++) {
-    int16_t gxr, gyr, gzr;
+    RawData gyr = readGyroRaw();
 
-    readGyroRaw(gxr, gyr, gzr);
-    bias.x += gxr;
-    bias.y += gyr;
-    bias.z += gzr;
+    bias.x += gyr.rx;
+    bias.y += gyr.ry;
+    bias.z += gyr.rz;
   }
 
   bias.x = bias.x / 32;
@@ -738,12 +759,11 @@ BiasOffsets ReefwingLSM9DS1::calibrateAccel() {
 
   //  Average 32 zero-rate (bias offset) samples
   for (int i = 0; i < 32; i++) {
-    int16_t axr, ayr, azr;
+    RawData acc = readAccelRaw();
 
-    readAccelRaw(axr, ayr, azr);
-    bias.x += axr;
-    bias.y += ayr;
-    bias.z += azr - (int16_t)(1.0f/_aRes);
+    bias.x += acc.rx;
+    bias.y += acc.ry;
+    bias.z += acc.rz - (int16_t)(1.0f/_aRes);
   }
 
   bias.x = bias.x / 32;
@@ -765,16 +785,14 @@ BiasOffsets ReefwingLSM9DS1::calibrateMag() {
       yield();
     }
 
-    int16_t mxr, myr, mzr;
+    RawData mag = readMagRaw();
 
-    readMagRaw(mxr, myr, mzr);
-
-    if (mxr > max.x) {  max.x = mxr;  }
-    if (mxr < min.x) {  min.x = mxr;  }
-    if (myr > max.y) {  max.y = myr;  }
-    if (myr < min.y) {  min.y = myr;  }
-    if (mzr > max.z) {  max.z = mzr;  }
-    if (mzr < min.z) {  min.z = mzr;  }
+    if (mag.rx > max.x) {  max.x = mag.rx;  }
+    if (mag.rx < min.x) {  min.x = mag.rx;  }
+    if (mag.ry > max.y) {  max.y = mag.ry;  }
+    if (mag.ry < min.y) {  min.y = mag.ry;  }
+    if (mag.rz > max.z) {  max.z = mag.rz;  }
+    if (mag.rz < min.z) {  min.z = mag.rz;  }
   }
 
   bias.x = (max.x + min.x) / 2;
@@ -946,7 +964,7 @@ bool ReefwingLSM9DS1::accelAvailable() {
 }
 
 bool ReefwingLSM9DS1::magAvailable() {
-	uint8_t STATUS_REG_M = readRegister(LSM9DS1M_ADDRESS, LSM9DS1M_STATUS_REG_M);
+	uint8_t STATUS_REG_M = readByte(LSM9DS1M_ADDRESS, LSM9DS1M_STATUS_REG_M);
 	
 	return (STATUS_REG_M & 0x08);
 }
@@ -980,91 +998,109 @@ float ReefwingLSM9DS1::readTemp(TempScale scale) {
   return result;
 }
 
-void ReefwingLSM9DS1::readGyro(float &gx, float &gy, float &gz) {
-  int16_t gxr, gyr, gzr;
+ScaledData ReefwingLSM9DS1::readGyro() {
+  RawData gyr;
+  ScaledData result;
 
   //  Read the signed 16-bit RAW values
-  readGyroRaw(gxr, gyr, gzr);
+  gyr = readGyroRaw();
 
   //  Subtract the bias offsets
-  gxr -= _config.gyro.bias.x;
-  gyr -= _config.gyro.bias.y;
-  gzr -= _config.gyro.bias.z;
+  gyr.rx -= _config.gyro.bias.x;
+  gyr.ry -= _config.gyro.bias.y;
+  gyr.rz -= _config.gyro.bias.z;
 
   //  Scale to DPS
-  gx = gxr * _gRes;
-  gy = gyr * _gRes;
-  gz = gzr * _gRes;
+  result.sx = gyr.rx * _gRes;
+  result.sy = gyr.ry * _gRes;
+  result.sz = gyr.rz * _gRes;
+
+  return result;
 }
 
-void ReefwingLSM9DS1::readGyroRaw(int16_t &gxr, int16_t &gyr, int16_t &gzr) {
-  uin8_t regValue[6];
+RawData ReefwingLSM9DS1::readGyroRaw() {
+  uint8_t regValue[6];
+  RawData gyr;
 
   //  Read the six 8-bit gyro axis rate values
   readBytes(LSM9DS1AG_ADDRESS, LSM9DS1AG_OUT_X_L_G, 6, regValue);
 
   // Convert to the RAW signed 16-bit readings
-  gxr = (regValue[1] << 8) | regValue[0];
-  gyr = (regValue[3] << 8) | regValue[2];
-  gzr = (regValue[5] << 8) | regValue[4];
+  gyr.rx = (regValue[1] << 8) | regValue[0];
+  gyr.ry = (regValue[3] << 8) | regValue[2];
+  gyr.rz = (regValue[5] << 8) | regValue[4];
+
+  return gyr;
 }
 
-void ReefwingLSM9DS1::readAccel(float &ax, float &ay, float &az) {
-  int16_t axr, ayr, azr;
+ScaledData ReefwingLSM9DS1::readAccel() {
+  RawData acc;
+  ScaledData result;
 
   //  Read the signed 16-bit RAW values
-  readAccelRaw(axr, ayr, azr);
+  acc = readAccelRaw();
 
   //  Subtract the bias offsets
-  axr -= _config.accel.bias.x;
-  ayr -= _config.accel.bias.y;
-  azr -= _config.accel.bias.z;
+  acc.rx -= _config.accel.bias.x;
+  acc.ry -= _config.accel.bias.y;
+  acc.rz -= _config.accel.bias.z;
 
   //  Scale to G's
-  ax = axr * _aRes;
-  ay = ayr * _aRes;
-  az = azr * _aRes;
+  result.sx = acc.rx * _aRes;
+  result.sy = acc.ry * _aRes;
+  result.sz = acc.rz * _aRes;
+
+  return result;
 }
 
-void ReefwingLSM9DS1::readAccelRaw(int16_t &axr, int16_t &ayr, int16_t &azr) {
-  uin8_t regValue[6];
+RawData ReefwingLSM9DS1::readAccelRaw() {
+  uint8_t regValue[6];
+  RawData acc;
 
   //  Read the six 8-bit accelerometer axis values
   readBytes(LSM9DS1AG_ADDRESS, LSM9DS1AG_OUT_X_L_XL, 6, regValue);
 
   // Convert to the RAW signed 16-bit readings
-  axr = (regValue[1] << 8) | regValue[0];
-  ayr = (regValue[3] << 8) | regValue[2];
-  azr = (regValue[5] << 8) | regValue[4];
+  acc.rx = (regValue[1] << 8) | regValue[0];
+  acc.ry = (regValue[3] << 8) | regValue[2];
+  acc.rz = (regValue[5] << 8) | regValue[4];
+
+  return acc;
 }
 
-void ReefwingLSM9DS1::readMag(float &mx, float &my, float &mz) {
-  int16_t mxr, myr, mzr;
+ScaledData ReefwingLSM9DS1::readMag() {
+  RawData mag;
+  ScaledData result;
 
   //  Read the signed 16-bit RAW values
-  readMagRaw(mxr, myr, mzr);
+  mag = readMagRaw();
 
   //  Subtract the bias offsets
-  mxr -= _config.mag.bias.x;
-  myr -= _config.mag.bias.y;
-  mzr -= _config.mag.bias.z;
+  mag.rx -= _config.mag.bias.x;
+  mag.ry -= _config.mag.bias.y;
+  mag.rz -= _config.mag.bias.z;
 
   //  Scale to Gauss
-  mx = mxr * _mRes;
-  my = myr * _mRes;
-  mz = mzr * _mRes;
+  result.sx = mag.rx * _mRes;
+  result.sy = mag.ry * _mRes;
+  result.sz = mag.rz * _mRes;
+
+  return result;
 }
 
-void ReefwingLSM9DS1::readMagRaw(int16_t &mxr, int16_t &myr, int16_t &mzr) {
-  uin8_t regValue[6];
+RawData ReefwingLSM9DS1::readMagRaw() {
+  uint8_t regValue[6];
+  RawData mag;
 
   //  Read the six 8-bit magnetometer axis values
   readBytes(LSM9DS1M_ADDRESS, LSM9DS1M_OUT_X_L_M, 6, regValue);
 
   // Convert to the RAW signed 16-bit readings
-  mxr = (regValue[1] << 8) | regValue[0];
-  myr = (regValue[3] << 8) | regValue[2];
-  mzr = (regValue[5] << 8) | regValue[4];
+  mag.rx = (regValue[1] << 8) | regValue[0];
+  mag.ry = (regValue[3] << 8) | regValue[2];
+  mag.rz = (regValue[5] << 8) | regValue[4];
+
+  return mag;
 }
 
 /******************************************************************
@@ -1074,29 +1110,29 @@ void ReefwingLSM9DS1::readMagRaw(int16_t &mxr, int16_t &myr, int16_t &mzr) {
  ******************************************************************/
 
 uint8_t ReefwingLSM9DS1::readByte(uint8_t address, uint8_t regAddress) {
-  _wire.beginTransmission(address);
-  _wire.write(regAddress);
-  _wire.endTransmission(false);
-  _wire.requestFrom(address, 1);
+  _wire->beginTransmission(address);
+  _wire->write(regAddress);
+  _wire->endTransmission(false);
+  _wire->requestFrom(address, 1);
 
-  return _wire.read();
+  return _wire->read();
 }
 
 void ReefwingLSM9DS1::readBytes(uint8_t address, uint8_t regAddress, uint8_t numBytes, uint8_t *dest) {  
   uint8_t i = 0;
 
-  _wire.beginTransmission(address);   
-  _wire.write(regAddress);            
-  _wire.endTransmission(false);       
-  _wire.requestFrom(address, numBytes);  
+  _wire->beginTransmission(address);   
+  _wire->write(regAddress);            
+  _wire->endTransmission(false);       
+  _wire->requestFrom(address, numBytes);  
   
-  while (_wire.available()) {
-    dest[i++] = _wire.read(); }         
+  while (_wire->available()) {
+    dest[i++] = _wire->read(); }         
 }
 
 void ReefwingLSM9DS1::writeByte(uint8_t address, uint8_t regAddress, uint8_t data) {
-  _wire.beginTransmission(address);
-  _wire.write(regAddress);
-  _wire.write(data);
-  _wire.endTransmission();
+  _wire->beginTransmission(address);
+  _wire->write(regAddress);
+  _wire->write(data);
+  _wire->endTransmission();
 }

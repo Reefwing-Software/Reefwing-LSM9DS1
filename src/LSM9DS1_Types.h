@@ -134,7 +134,8 @@ enum AccelODR {
   AODR_119Hz,          //  ODR_XL = 011
   AODR_238Hz,          //  ODR_XL = 100
   AODR_476Hz,          //  ODR_XL = 101
-  AODR_952Hz           //  ODR_XL = 110
+  AODR_952Hz,          //  ODR_XL = 110
+  AODR_GYRO_VALUE      //  NORMAL op Mode
 };
 
 //  Allowable gyroscope sample rates (ODR)
@@ -304,6 +305,14 @@ struct MagTestResults {
   float magdx;
   float magdy;
   float magdz;
+};
+
+struct RawData {
+  int16_t rx, ry, rz;
+};
+
+struct ScaledData {
+  float sx, sy, sz;
 };
 
 struct SensorData {

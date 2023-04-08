@@ -72,12 +72,12 @@ public:
   bool tempAvailable();
 
   float readTemp(TempScale scale = TempScale::CELSIUS);
-  void readGyro(float &gx, float &gy, float &gz);
-  void readGyroRaw(int16_t &gxr, int16_t &gyr, int16_t &gzr);
-  void readAccel(float &ax, float &ay, float &az);
-  void readAccelRaw(int16_t &axr, int16_t &ayr, int16_t &azr);
-  void readMag(float &mx, float &my, float &mz);
-  void readMagRaw(int16_t &mxr, int16_t &myr, int16_t &mzr);
+  ScaledData readGyro();
+  RawData readGyroRaw();
+  ScaledData readAccel();
+  RawData readAccelRaw();
+  ScaledData readMag();
+  RawData readMagRaw();
 
   BiasOffsets calibrateGyro();
   BiasOffsets calibrateAccel();
