@@ -236,6 +236,10 @@ enum SensorType {
  * 
  ******************************************************************/
 
+struct BiasOffsets {
+  int16_t x, y, z;
+};
+
 struct GyroConfig {
   bool powerDown = true;
   bool sleepEnabled = false;
@@ -285,10 +289,6 @@ struct Configuration {
   AccelConfig accel;
   MagConfig mag;
   TempConfig temp;
-};
-
-struct BiasOffsets {
-  int16_t x, y, z;
 };
 
 struct SelfTestResults {

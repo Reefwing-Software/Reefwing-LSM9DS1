@@ -20,7 +20,7 @@
  * 
  ******************************************************************/
 
-ReefwingLSM9DS1::LSM9DS1() { }
+ReefwingLSM9DS1::ReefwingLSM9DS1() { }
 
 void ReefwingLSM9DS1::reset() {
   writeByte(LSM9DS1AG_ADDRESS, LSM9DS1AG_CTRL_REG8, 0x05);
