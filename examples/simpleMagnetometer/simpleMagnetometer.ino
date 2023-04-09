@@ -36,6 +36,7 @@ void setup() {
   if (imu.connected()) {
     Serial.println("LSM9DS1 IMU Connected."); 
     imu.start();
+    imu.calibrateMag();
     delay(20);
     //  Flush first reading
     imu.readMag();
