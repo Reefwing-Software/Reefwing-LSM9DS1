@@ -34,9 +34,7 @@ void setup() {
   while (!Serial);
 
   if (imu.connected()) {
-    Serial.println("LSM9DS1 IMU Connected."); 
     imu.start();
-    imu.calibrateMag();
     delay(20);
     //  Flush first reading
     imu.readMag();
@@ -46,6 +44,7 @@ void setup() {
   }
 
   if (useSerialMonitor) {
+    Serial.println("LSM9DS1 IMU Connected."); 
     Serial.println("\nDefault Magnetometer Configuration used:");
     Serial.println("  - Full Scale: ± 4 Gauss");
     Serial.println("  - Sample Rate (ODR): 10 Hz\n");

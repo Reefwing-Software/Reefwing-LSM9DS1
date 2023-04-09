@@ -16,6 +16,7 @@
 
 ReefwingLSM9DS1 imu;
 SelfTestResults results;
+MagTestResults magResults;
 
 bool sensorInRange(float x, float y, float z, float min, float max) {
   return ((min <= x && x <= max) &&
@@ -89,6 +90,37 @@ void setup() {
   }
   else {
     Serial.println("ACCELEROMETER FAILED SELF-TEST");
+  }
+
+  magResults = imu.selfTestMag();
+
+  Serial.println("\nMagnetometer SELF TEST");
+  Serial.print("x-axis: "); 
+  Serial.print(magResults.magdx); 
+  Serial.println(" gauss"); 
+
+  Serial.print("y-axis = "); 
+  Serial.print(magResults.magdy); 
+  Serial.println(" gauss"); 
+
+  Serial.print("z-axis = "); 
+  Serial.print(magResults.magdz); 
+  Serial.println(" gauss"); 
+
+  Serial.println("Magnetometer x and y axis expected range: 1.0 - 3.0 gauss");
+  Serial.println("Magnetometer z axis expected range: 0.1 - 1.0 gauss");
+
+  if (sensorInRange(magResults.magdx, magResults.magdy, magResults.magdy, 1.0, 3.0)) {
+    Serial.println("MAGNETOMETER X & Y AXIS PASSED SELF-TEST");
+  }
+  else {
+    Serial.println("MAGNETOMETER X & Y FAILED SELF-TEST");
+  }
+  if (sensorInRange(magResults.magdz, magResults.magdz, magResults.magdz, 0.1, 1.0)) {
+    Serial.println("MAGNETOMETER Z AXIS PASSED SELF-TEST");
+  }
+  else {
+    Serial.println("MAGNETOMETER Z FAILED SELF-TEST");
   }
 }
 

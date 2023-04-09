@@ -79,11 +79,11 @@ public:
   ScaledData readMag();
   RawData readMagRaw();
 
-  BiasOffsets calibrateGyro();
-  BiasOffsets calibrateGyroFIFO();
-  BiasOffsets calibrateAccel();
-  BiasOffsets calibrateAccelFIFO();
-  BiasOffsets calibrateMag();
+  BiasOffsets calibrateGyro(bool save = true);
+  BiasOffsets calibrateGyroFIFO(bool save = true);
+  BiasOffsets calibrateAccel(bool save = true);
+  BiasOffsets calibrateAccelFIFO(bool save = true);
+  BiasOffsets calibrateMag(bool save = true);
   BiasOffsets getBiasOffset(SensorType sensor);
 
   SelfTestResults selfTestGyroAccel();

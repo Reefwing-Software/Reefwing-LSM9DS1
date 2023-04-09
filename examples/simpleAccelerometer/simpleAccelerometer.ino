@@ -33,19 +33,20 @@ void setup() {
   Serial.begin(115200);
   while (!Serial);
 
-  if (imu.connected()) {
-    Serial.println("LSM9DS1 IMU Connected."); 
+  if (imu.connected()) { 
     imu.start();
     imu.calibrateAccel();
     delay(20);
     //  Flush first reading
     imu.readAccel();
-  } else {
+  } 
+  else {
     Serial.println("LSM9DS1 IMU Not Detected.");
     while(1);
   }
 
   if (useSerialMonitor) {
+    Serial.println("LSM9DS1 IMU Connected.");
     Serial.println("\nDefault Accelerometer Configuration used:");
     Serial.println("  - Full Scale: ± 8 g");
     Serial.println("  - Sample Rate (ODR): 119 Hz\n");

@@ -33,8 +33,7 @@ void setup() {
   Serial.begin(115200);
   while (!Serial);
 
-  if (imu.connected()) {
-    Serial.println("LSM9DS1 IMU Connected."); 
+  if (imu.connected()) { 
     imu.start();
     imu.calibrateGyro();
     delay(20);
@@ -46,6 +45,7 @@ void setup() {
   }
 
   if (useSerialMonitor) {
+    Serial.println("LSM9DS1 IMU Connected.");
     Serial.println("\nDefault Gyro Configuration used:");
     Serial.println("  - Full Scale: 2000 DPS");
     Serial.println("  - Sample Rate (ODR): 119 Hz\n");

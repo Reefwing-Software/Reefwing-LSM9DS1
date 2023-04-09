@@ -713,7 +713,7 @@ void ReefwingLSM9DS1::setTempOffset(float offset) {
   _config.temp.offset = offset;
 }
 
-BiasOffsets ReefwingLSM9DS1::calibrateGyro() {
+BiasOffsets ReefwingLSM9DS1::calibrateGyro(bool save) {
   BiasOffsets bias;
 
   //  Average 32 zero-rate (bias offset) samples
@@ -733,12 +733,12 @@ BiasOffsets ReefwingLSM9DS1::calibrateGyro() {
   bias.y = bias.y / 32;
   bias.z = bias.z / 32;
 
-  setBiasOffset(GYROSCOPE, bias);
+  if (save) {  setBiasOffset(GYROSCOPE, bias);  }
 
   return bias;
 }
 
-BiasOffsets ReefwingLSM9DS1::calibrateGyroFIFO() {
+BiasOffsets ReefwingLSM9DS1::calibrateGyroFIFO(bool save) {
   BiasOffsets bias;
 
   //  Turn on FIFO and set sample threshold to 32
@@ -763,14 +763,14 @@ BiasOffsets ReefwingLSM9DS1::calibrateGyroFIFO() {
   bias.y = bias.y / 32;
   bias.z = bias.z / 32;
 
-  setBiasOffset(GYROSCOPE, bias);
+  if (save) {  setBiasOffset(GYROSCOPE, bias);  }
   enableFIFO(false);
   setFIFOMode(BYPASS, 0x00);
 
   return bias;
 }
 
-BiasOffsets ReefwingLSM9DS1::calibrateAccel() {
+BiasOffsets ReefwingLSM9DS1::calibrateAccel(bool save) {
   BiasOffsets bias;
 
   //  Average 32 zero-rate (bias offset) samples
@@ -790,12 +790,12 @@ BiasOffsets ReefwingLSM9DS1::calibrateAccel() {
   bias.y = bias.y / 32;
   bias.z = bias.z / 32;
 
-  setBiasOffset(ACCELEROMETER, bias);
+  if (save) {  setBiasOffset(ACCELEROMETER, bias);  }
 
   return bias;
 }
 
-BiasOffsets ReefwingLSM9DS1::calibrateAccelFIFO() {
+BiasOffsets ReefwingLSM9DS1::calibrateAccelFIFO(bool save) {
   BiasOffsets bias;
 
   //  Turn on FIFO and set sample threshold to 32
@@ -820,14 +820,14 @@ BiasOffsets ReefwingLSM9DS1::calibrateAccelFIFO() {
   bias.y = bias.y / 32;
   bias.z = bias.z / 32;
 
-  setBiasOffset(ACCELEROMETER, bias);
+  if (save) {  setBiasOffset(ACCELEROMETER, bias);  }
   enableFIFO(false);
   setFIFOMode(BYPASS, 0x00);
 
   return bias;
 }
 
-BiasOffsets ReefwingLSM9DS1::calibrateMag() {
+BiasOffsets ReefwingLSM9DS1::calibrateMag(bool save) {
   BiasOffsets bias, min, max;
 
   for (int i = 0; i < 128; i++) {
@@ -849,7 +849,7 @@ BiasOffsets ReefwingLSM9DS1::calibrateMag() {
   bias.y = (max.y + min.y) / 2;
   bias.z = (max.z + min.z) / 2;
 
-  setBiasOffset(MAGNETOMETER, bias);
+  if (save) {  setBiasOffset(MAGNETOMETER, bias);  }
 
   return bias;
 }
@@ -887,19 +887,25 @@ SelfTestResults ReefwingLSM9DS1::selfTestGyroAccel() {
   BiasOffsets gyro_noST, gyro_ST, accel_noST, accel_ST;
 
   writeByte(LSM9DS1AG_ADDRESS, LSM9DS1AG_CTRL_REG10,   0x00); //  Disable self test
-  gyro_noST = calibrateGyro();
-  accel_noST = calibrateAccel();
+  gyro_noST = calibrateGyro(false);
+  accel_noST = calibrateAccel(false);
   writeByte(LSM9DS1AG_ADDRESS, LSM9DS1AG_CTRL_REG10,   0x05); //  Enable gyro/accel self test
-  gyro_ST = calibrateGyro();
-  accel_ST = calibrateAccel();
+  gyro_ST = calibrateGyro(false);
+  accel_ST = calibrateAccel(false);
 
   results.gyrodx = (gyro_ST.x - gyro_noST.x) * _gRes;
   results.gyrody = (gyro_ST.y - gyro_noST.y) * _gRes;
   results.gyrodz = (gyro_ST.z - gyro_noST.z) * _gRes;
+  results.gyrodx = abs(results.gyrodx);
+  results.gyrody = abs(results.gyrody);
+  results.gyrodz = abs(results.gyrodz);
 
   results.accdx = 1000.0 * (accel_ST.x - accel_noST.x) * _aRes;
   results.accdy = 1000.0 * (accel_ST.y - accel_noST.y) * _aRes;
   results.accdz = 1000.0 * (accel_ST.z - accel_noST.z) * _aRes;
+  results.accdx = abs(results.accdx);
+  results.accdy = abs(results.accdy);
+  results.accdz = abs(results.accdz);
 
   writeByte(LSM9DS1AG_ADDRESS, LSM9DS1AG_CTRL_REG10,   0x00); //  Disable self test
   delay(200);
@@ -966,10 +972,13 @@ MagTestResults ReefwingLSM9DS1::selfTestMag() {
 
   mag_ST = averageMagOffsets();
 
-  //  Calculate difference and scale to _mRes = ± 12 gauss
+  //  Calculate absolute difference and scale to _mRes = ± 12 gauss
   results.magdx = (mag_ST.x - mag_noST.x) * SENSITIVITY_MAGNETOMETER_12;
   results.magdy = (mag_ST.y - mag_noST.y) * SENSITIVITY_MAGNETOMETER_12;
   results.magdz = (mag_ST.z - mag_noST.z) * SENSITIVITY_MAGNETOMETER_12;
+  results.magdx = abs(results.magdx);
+  results.magdy = abs(results.magdy);
+  results.magdz = abs(results.magdz);
 
   writeByte(LSM9DS1M_ADDRESS, LSM9DS1M_CTRL_REG1_M, 0x1C);  //  Disable Self Test
   writeByte(LSM9DS1M_ADDRESS, LSM9DS1M_CTRL_REG3_M, 0x03);  //  Power Down mode
