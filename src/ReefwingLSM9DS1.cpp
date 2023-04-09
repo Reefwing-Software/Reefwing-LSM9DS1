@@ -716,6 +716,31 @@ void ReefwingLSM9DS1::setTempOffset(float offset) {
 BiasOffsets ReefwingLSM9DS1::calibrateGyro() {
   BiasOffsets bias;
 
+  //  Average 32 zero-rate (bias offset) samples
+  for (int i = 0; i < 32; i++) {
+    while (!gyroAvailable()) {
+      yield();
+    }
+
+    RawData gyr = readGyroRaw();
+
+    bias.x += gyr.rx;
+    bias.y += gyr.ry;
+    bias.z += gyr.rz;
+  }
+
+  bias.x = bias.x / 32;
+  bias.y = bias.y / 32;
+  bias.z = bias.z / 32;
+
+  setBiasOffset(GYROSCOPE, bias);
+
+  return bias;
+}
+
+BiasOffsets ReefwingLSM9DS1::calibrateGyroFIFO() {
+  BiasOffsets bias;
+
   //  Turn on FIFO and set sample threshold to 32
   enableFIFO(true);
   setFIFOMode(FIFO_THS, 0x1F);
@@ -746,6 +771,31 @@ BiasOffsets ReefwingLSM9DS1::calibrateGyro() {
 }
 
 BiasOffsets ReefwingLSM9DS1::calibrateAccel() {
+  BiasOffsets bias;
+
+  //  Average 32 zero-rate (bias offset) samples
+  for (int i = 0; i < 32; i++) {
+    while (!accelAvailable()) {
+      yield();
+    }
+
+    RawData acc = readAccelRaw();
+
+    bias.x += acc.rx;
+    bias.y += acc.ry;
+    bias.z += acc.rz - (int16_t)(1.0f/_aRes);
+  }
+
+  bias.x = bias.x / 32;
+  bias.y = bias.y / 32;
+  bias.z = bias.z / 32;
+
+  setBiasOffset(ACCELEROMETER, bias);
+
+  return bias;
+}
+
+BiasOffsets ReefwingLSM9DS1::calibrateAccelFIFO() {
   BiasOffsets bias;
 
   //  Turn on FIFO and set sample threshold to 32
@@ -853,8 +903,6 @@ SelfTestResults ReefwingLSM9DS1::selfTestGyroAccel() {
 
   writeByte(LSM9DS1AG_ADDRESS, LSM9DS1AG_CTRL_REG10,   0x00); //  Disable self test
   delay(200);
-  calibrateGyro();
-  calibrateAccel();
 
   return results;
 }

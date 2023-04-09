@@ -80,7 +80,9 @@ public:
   RawData readMagRaw();
 
   BiasOffsets calibrateGyro();
+  BiasOffsets calibrateGyroFIFO();
   BiasOffsets calibrateAccel();
+  BiasOffsets calibrateAccelFIFO();
   BiasOffsets calibrateMag();
   BiasOffsets getBiasOffset(SensorType sensor);
 
