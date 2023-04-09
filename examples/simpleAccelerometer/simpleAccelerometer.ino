@@ -1,6 +1,6 @@
 /******************************************************************
-  @file       simpleGyroscope.ino
-  @brief      Display the LSM9DS1 Gyroscope rate sensor readings
+  @file       simpleAccelerometer.ino
+  @brief      Display the LSM9DS1 Accelerometer sensor readings
   @author     David Such
   @copyright  Please see the accompanying LICENSE file
 
@@ -19,7 +19,7 @@ ReefwingLSM9DS1 imu;
 int loopFrequency = 0;
 const long displayPeriod = 1000;
 unsigned long previousMillis = 0;
-ScaledData gyro;
+ScaledData accel;
 
 //  Default to displaying gyro values to the Serial Monitor
 //  Set to false if you want to use the Arduino Serial Plotter
@@ -38,15 +38,15 @@ void setup() {
     imu.start();
     delay(20);
     //  Flush first reading
-    imu.readGyro();
+    imu.readAccel();
   } else {
     Serial.println("LSM9DS1 IMU Not Detected.");
     while(1);
   }
 
   if (useSerialMonitor) {
-    Serial.println("\nDefault Gyro Configuration used:");
-    Serial.println("  - Full Scale: 2000 DPS");
+    Serial.println("\nDefault Accelerometer Configuration used:");
+    Serial.println("  - Full Scale: ± 8 g");
     Serial.println("  - Sample Rate (ODR): 119 Hz\n");
   }
   else {
@@ -55,20 +55,20 @@ void setup() {
 }
 
 void loop() {
-  //  Read Gyroscope
-  if (imu.gyroAvailable()) {
-    gyro = imu.readGyro();
+  //  Read Accelerometer
+  if (imu.accelAvailable()) {
+    accel = imu.readAccel();
   
     if (useSerialMonitor) {
       if (millis() - previousMillis >= displayPeriod) {
         //  Display sensor data every displayPeriod, non-blocking.
-        Serial.print("Gyro X: ");
-        Serial.print(gyro.sx);
-        Serial.print("\tGyro Y: ");
-        Serial.print(gyro.sy);
-        Serial.print("\tGyro Z: ");
-        Serial.print(gyro.sz);
-        Serial.print(" DPS");
+        Serial.print("Accel X: ");
+        Serial.print(accel.sx);
+        Serial.print("\tAccel Y: ");
+        Serial.print(accel.sy);
+        Serial.print("\tAccel Z: ");
+        Serial.print(accel.sz);
+        Serial.print(" G'S");
       
         Serial.print("\tLoop Frequency: ");
         Serial.print(loopFrequency);
@@ -79,11 +79,11 @@ void loop() {
       }
     }
     else {
-      Serial.print(gyro.sx);
+      Serial.print(accel.sx);
       Serial.print('\t');
-      Serial.print(gyro.sy);
+      Serial.print(accel.sy);
       Serial.print('\t');
-      Serial.println(gyro.sz);
+      Serial.println(accel.sz);
     }
   }
 

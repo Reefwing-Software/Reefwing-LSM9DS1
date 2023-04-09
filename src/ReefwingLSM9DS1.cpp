@@ -44,7 +44,7 @@ void ReefwingLSM9DS1::begin(TwoWire *wire) {
   enableAccelAutoBandwidth(true);
   setSampleMode(CONTINUOUS);
   setGyroScale(FS_2000DPS);
-  setAccelScale(FS_XL_2G);
+  setAccelScale(FS_XL_8G);
   setMagScale(FS_4G);
   setGyroBandwidth(LOWEST);
   setGyroODR(GODR_119Hz);    //  NORMAL Op Mode, gyro rate = accel rate
