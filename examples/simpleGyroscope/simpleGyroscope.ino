@@ -22,7 +22,7 @@ unsigned long previousMillis = 0;
 ScaledData gyro;
 
 //  Default to displaying gyro values to the Serial Monitor
-//  Set to false if you want to use the Arduino Plotter
+//  Set to false if you want to use the Arduino Serial Plotter
 bool useSerialMonitor = true;
 
 void setup() {
@@ -36,17 +36,18 @@ void setup() {
   if (imu.connected()) {
     Serial.println("LSM9DS1 IMU Connected."); 
     imu.start();
-    imu.calibrateGyro();
+    delay(20);
+    imu.readGyro();
   } else {
     Serial.println("LSM9DS1 IMU Not Detected.");
     while(1);
   }
 
   if (useSerialMonitor) {
-    Serial.println("Default Gyro Configuration used:");
-    Serial.println("  - Full Scale: 245 DPS");
-    Serial.println("  - Sample Rate (ODR): 238 Hz");
-    Serial.println("\nGyro Calibrated.");
+    Serial.println("\nDefault Gyro Configuration used:");
+    Serial.println("  - Full Scale: 2000 DPS");
+    Serial.println("  - Sample Rate (ODR): 119 Hz");
+    Serial.println("\nGyro Calibrated.\n");
   }
   else {
     Serial.println("X \t Y \t Z");
@@ -57,32 +58,33 @@ void loop() {
   //  Read Gyroscope
   if (imu.gyroAvailable()) {
     gyro = imu.readGyro();
-  }
-
-  //  Display sensor data every displayPeriod, non-blocking.
-  if (millis() - previousMillis >= displayPeriod && useSerialMonitor) {
+  
+    if (useSerialMonitor) {
+      if (millis() - previousMillis >= displayPeriod) {
+        //  Display sensor data every displayPeriod, non-blocking.
+        Serial.print("Gyro X: ");
+        Serial.print(gyro.sx);
+        Serial.print("\tGyro Y: ");
+        Serial.print(gyro.sy);
+        Serial.print("\tGyro Z: ");
+        Serial.print(gyro.sz);
+        Serial.print(" DPS");
       
-    Serial.print("Gyro X: ");
-    Serial.print(gyro.sx);
-    Serial.print("\tGyro Y: ");
-    Serial.print(gyro.sy);
-    Serial.print("\tGyro Z: ");
-    Serial.print(gyro.sz);
-    Serial.print(" DPS");
-    
-    Serial.print("\tLoop Frequency: ");
-    Serial.print(loopFrequency);
-    Serial.println(" Hz");
-
-    loopFrequency = 0;
-    previousMillis = millis();
-  }
-  else {
-    Serial.print(gyro.sx);
-    Serial.print('\t');
-    Serial.print(gyro.sy);
-    Serial.print('\t');
-    Serial.println(gyro.sz);
+        Serial.print("\tLoop Frequency: ");
+        Serial.print(loopFrequency);
+        Serial.println(" Hz");
+  
+        loopFrequency = 0;
+        previousMillis = millis();
+      }
+    }
+    else {
+      Serial.print(gyro.sx);
+      Serial.print('\t');
+      Serial.print(gyro.sy);
+      Serial.print('\t');
+      Serial.println(gyro.sz);
+    }
   }
 
   loopFrequency++;
