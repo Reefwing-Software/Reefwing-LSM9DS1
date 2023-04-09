@@ -37,6 +37,7 @@ void setup() {
     Serial.println("LSM9DS1 IMU Connected."); 
     imu.start();
     delay(20);
+    //  Flush first reading
     imu.readGyro();
   } else {
     Serial.println("LSM9DS1 IMU Not Detected.");
