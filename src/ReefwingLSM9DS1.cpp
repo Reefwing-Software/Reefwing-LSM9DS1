@@ -48,7 +48,7 @@ void ReefwingLSM9DS1::begin(TwoWire *wire) {
   setMagScale(FS_4G);
   setGyroBandwidth(LOWEST);
   setGyroODR(GODR_119Hz);    //  NORMAL Op Mode, gyro rate = accel rate
-  setMagODR(MODR_10Hz);
+  setMagODR(MODR_40Hz);
 
   //  Flush the first 20 readings to allow for sensor turn on
   //  See Tables 11 and 12 in the LSM9DS1 Data Sheet
