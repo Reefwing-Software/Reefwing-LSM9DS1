@@ -16,21 +16,18 @@
 
 ReefwingLSM9DS1 imu;
 
-int loopFrequency = 0;
-const long displayPeriod = 1000;
-unsigned long previousMillis = 0;
 Configuration config;
 
 void printConfig() {
-  Serial.println("\n  ====  IMU Configuration    ====");
-  Serial.print("Gyro/Accel FIFO Enabled: "); Serial.print(config.gyroAccelFIFOEnabled ? "True" : "False");
-  Serial.print(", FIFO Mode (0 = BYPASS, 1 = FIFO_THS, 3 = CONT_TO_FIFO, 4 = BYPASS_TO_CONT, 6 = FIFO_CONT): "); 
-  Serial.print(config.fifoMode);
-  Serial.print(", FIFO Threshold: "); Serial.println(config.fifoThreshold);
+  Serial.println("\n  ========  IMU Configuration    ========");
+  Serial.print("Gyro/Accel FIFO Enabled: "); Serial.println(config.gyroAccelFIFOEnabled ? "True" : "False");
+  Serial.print("FIFO Mode (0 = BYPASS, 1 = FIFO_THS, 3 = CONT_TO_FIFO, 4 = BYPASS_TO_CONT, 6 = FIFO_CONT): "); 
+  Serial.println(config.fifoMode);
+  Serial.print("FIFO Threshold: "); Serial.println(config.fifoThreshold);
   Serial.print("Gyro/Accel Operating Mode (0 = OFF, 1 = ACCEL, 2 = NORMAL, 3 = LOW_PWR): "); 
   Serial.println(config.gyroAccelOpMode);
 
-  Serial.println("\n  ====  GYRO Configuration    ====");
+  Serial.println("\n  ========  GYRO Configuration    ========");
   Serial.print("Power Down: "); Serial.print(config.gyro.powerDown ? "True" : "False");
   Serial.print(", Sleep Enabled: "); Serial.print(config.gyro.sleepEnabled ? "True" : "False");
   Serial.print(", Low Power Enabled: "); Serial.println(config.gyro.lowPowerEnabled ? "True" : "False");
@@ -38,14 +35,14 @@ void printConfig() {
   Serial.print("ODR (0 = OFF, 1 = 14.9, 2 = 59.5, 3 = 119, 4 = 238, 5 = 476, 6 = 952 Hz): "); 
   Serial.println(config.gyro.sampleRate);
   Serial.print("Bandwidth (0 = LOW, 1 = MID, 2 = HIGH, 3 = MAX): "); Serial.println(config.gyro.bandwidth);
-  Serial.print("Orientation: (0 = XYZ)"); Serial.print(config.gyro.orientation);
+  Serial.print("Orientation: (0 = XYZ): "); Serial.print(config.gyro.orientation);
   Serial.print(", Sign (0 = NONE): "); Serial.println(config.gyro.reverseSign);
   Serial.print("Raw Bias Offset, X: "); Serial.print(config.gyro.bias.x);
   Serial.print(", Y: "); Serial.print(config.gyro.bias.y);
   Serial.print(", Z: "); Serial.println(config.gyro.bias.z);
 
-  Serial.println("\n  ====  ACCEL Configuration    ====");
-  Serial.print("Power Down: "); Serial.print(config.accel.powerDown ? "True" : "False");
+  Serial.println("\n  ========  ACCEL Configuration    ========");
+  Serial.print("Power Down (True in NORMAL mode): "); Serial.println(config.accel.powerDown ? "True" : "False");
   Serial.print("Enable Auto Bandwidth: "); Serial.println(config.accel.autoBandwidthEnable ? "True" : "False");
   Serial.print("Scale (0 = 2, 1 = 16, 2 = 4, 3 = 8 G's): "); Serial.println(config.accel.scale);
   Serial.print("ODR (0 = OFF, 1 = 10, 2 = 50, 3 = 119, 4 = 238, 5 = 476, 6 = 952, 7 = Gyro ODR): "); 
@@ -56,7 +53,7 @@ void printConfig() {
   Serial.print(", Y: "); Serial.print(config.accel.bias.y);
   Serial.print(", Z: "); Serial.println(config.accel.bias.z);
 
-  Serial.println("\n  ====  MAG Configuration    ====");
+  Serial.println("\n  ========  MAG Configuration    ========");
   Serial.print("Fast ODR Enabled: "); Serial.print(config.mag.fastODR ? "True" : "False");
   Serial.print(", Temp Compensation Enabled: "); Serial.println(config.mag.temperatureCompensated ? "True" : "False");
   Serial.print("Operating Mode (0 = LOW, 1 = MED, 2 = HIGH, 3 = ULTRA): "); 
@@ -66,14 +63,15 @@ void printConfig() {
   Serial.print("Scale (0 = 4, 1 = 8, 2 = 12, 3 = 16 gauss): "); 
   Serial.println(config.mag.scale);
   Serial.println("ODR (0 = 0.625, 1 = 1.25, 2 = 2.5, 3 = 5, 4 = 10, 5 = 20, 6 = 40, 7 = 80 Hz..."); 
-  Serial.print("FAST ODR (8 = 155, 9 = 300, 10 = 560, 11 = 1000 Hz): ");
+  Serial.print("...FAST ODR 8 = 155, 9 = 300, 10 = 560, 11 = 1000 Hz): ");
   Serial.println(config.mag.sampleRate);
   Serial.print("Raw Bias Offset, X: "); Serial.print(config.mag.bias.x);
   Serial.print(", Y: "); Serial.print(config.mag.bias.y);
   Serial.print(", Z: "); Serial.println(config.mag.bias.z);
 
-  Serial.println("\n  ====  TEMPERATURE Configuration    ====");
-  Serial.print("Temp Offset: "); Serial.print(config.temp.offset); Serial.println("°C\n")
+  Serial.println("\n  ========  TEMPERATURE Configuration    ========");
+  Serial.print("Temp Offset: "); Serial.print(config.temp.offset); Serial.println("°C\n");
+  Serial.println("-----------------------------------------------------------------------------\n");
 }
 
 void setup() {
@@ -86,6 +84,7 @@ void setup() {
 
   if (imu.connected()) {
     Serial.println("LSM9DS1 IMU Connected."); 
+    Serial.println("Default Configuration.\n"); 
 
     //  Read and display default configuration
     config = imu.getConfig();
@@ -104,6 +103,8 @@ void setup() {
     imu.calibrateAccel();
     imu.calibrateMag();
 
+    Serial.println("NEW Configuration.\n");
+    config = imu.getConfig();
     printConfig();
 
     delay(20);
@@ -118,42 +119,4 @@ void setup() {
   }
 }
 
-void loop() {
-  imu.updateSensorData();
-
-  if (millis() - previousMillis >= displayPeriod) {
-    //  Display sensor data every displayPeriod, non-blocking.
-    Serial.print("Gyro X: ");
-    Serial.print(imu.data.gx);
-    Serial.print("\tGyro Y: ");
-    Serial.print(imu.data.gy);
-    Serial.print("\tGyro Z: ");
-    Serial.print(imu.data.gz);
-    Serial.print(" DPS");
-  
-    Serial.print("\tLoop Frequency: ");
-    Serial.print(loopFrequency);
-    Serial.println(" Hz");
-
-    Serial.print("Accel X: ");
-    Serial.print(imu.data.ax);
-    Serial.print("\tAccel Y: ");
-    Serial.print(imu.data.ay);
-    Serial.print("\tAccel Z: ");
-    Serial.print(imu.data.az);
-    Serial.println(" G'S");
-
-    Serial.print("Mag X: ");
-    Serial.print(imu.data.mx);
-    Serial.print("\tMag Y: ");
-    Serial.print(imu.data.my);
-    Serial.print("\tMag Z: ");
-    Serial.print(imu.data.mz);
-    Serial.println(" gauss\n");
-
-    loopFrequency = 0;
-    previousMillis = millis();
-  }
-
-  loopFrequency++;
-}
+void loop() { }
