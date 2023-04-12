@@ -7,7 +7,33 @@
 #######################################
 
 ReefwingLSM9DS1 KEYWORD1
-LSM9DS1 KEYWORD1
+TempScale   KEYWORD1
+GyroAccelOpModes    KEYWORD1
+MagOpModes  KEYWORD1
+MagSampleModes  KEYWORD1
+AccelScale  KEYWORD1
+GyroScale   KEYWORD1
+MagScale    KEYWORD1
+AccelODR    KEYWORD1
+GyroODR KEYWORD1
+MagODR  KEYWORD1
+AccelBW KEYWORD1
+GyroBW  KEYWORD1
+GyroReverseSign KEYWORD1
+GyroOrient  KEYWORD1
+FIFOMode    KEYWORD1
+SensorType  KEYWORD1
+BiasOffsets KEYWORD1
+GyroConfig  KEYWORD1
+AccelConfig KEYWORD1
+MagConfig   KEYWORD1
+TempConfig  KEYWORD1
+Configuration   KEYWORD1
+SelfTestResults KEYWORD1
+MagTestResults  KEYWORD1
+RawData KEYWORD1
+ScaledData  KEYWORD1
+SensorData  KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -16,13 +42,51 @@ LSM9DS1 KEYWORD1
 begin  KEYWORD2
 start   KEYWORD2
 reset   KEYWORD2
-update  KEYWORD2
-rawData KEYWORD2
-selfTest    KEYWORD2
 connected   KEYWORD2
-whoAmI  KEYWORD2
-setODR  KEYWORD2
-readTemperature	KEYWORD2
+updateSensorData    KEYWORD2
+enableLowPower  KEYWORD2
+enableGyroSleep KEYWORD2
+enableAccelAutoBandwidth    KEYWORD2
+enableMagFastODR    KEYWORD2
+enableMagTempComp   KEYWORD2
+enableFIFO  KEYWORD2
+setTempOffset   KEYWORD2
+setBiasOffset   KEYWORD2
+setFIFOMode KEYWORD2
+getFIFOSampleNumber KEYWORD2
+reverseGyroSign KEYWORD2
+setGyroOrientation  KEYWORD2
+setSampleMode   KEYWORD2
+setMagOperatingMode KEYWORD2
+setGyroScale    KEYWORD2
+setAccelScale   KEYWORD2
+setMagScale KEYWORD2
+setGyroODR  KEYWORD2
+setAccelODR KEYWORD2
+setMagODR   KEYWORD2
+setGyroBandwidth    KEYWORD2
+setAccelBandwidth   KEYWORD2
+gyroAvailable   KEYWORD2
+accelAvailable  KEYWORD2
+magAvailable    KEYWORD2
+tempAvailable   KEYWORD2
+readTemp    KEYWORD2
+readGyro    KEYWORD2
+readGyroRaw KEYWORD2
+readAccel   KEYWORD2
+readAccelRaw    KEYWORD2
+readMag KEYWORD2
+readMagRaw  KEYWORD2
+calibrateGyro   KEYWORD2
+calibrateGyroFIFO   KEYWORD2
+calibrateAccel  KEYWORD2
+calibrateAccelFIFO  KEYWORD2
+calibrateMag    KEYWORD2
+getBiasOffset   KEYWORD2
+selfTestGyroAccel   KEYWORD2
+selfTestMag KEYWORD2
+getConfig   KEYWORD2
+twosCompToInteger   KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
@@ -30,3 +94,19 @@ readTemperature	KEYWORD2
 
 NONE    LITERAL1
 LSM9DS1_WHO_AM_I    LITERAL1
+LSM9DS1AG_ADDRESS   LITERAL1
+LSM9DS1M_ADDRESS    LITERAL1
+HTS221_ADDRESS  LITERAL1
+HS3003_ADDRESS  LITERAL1
+FLUSH_SAMPLES   LITERAL1
+SENSITIVITY_ACCELEROMETER_2 LITERAL1
+SENSITIVITY_ACCELEROMETER_4 LITERAL1
+SENSITIVITY_ACCELEROMETER_8 LITERAL1
+SENSITIVITY_ACCELEROMETER_16    LITERAL1
+SENSITIVITY_GYROSCOPE_245   LITERAL1
+SENSITIVITY_GYROSCOPE_500   LITERAL1
+SENSITIVITY_GYROSCOPE_2000  LITERAL1
+SENSITIVITY_MAGNETOMETER_4  LITERAL1
+SENSITIVITY_MAGNETOMETER_8  LITERAL1
+SENSITIVITY_MAGNETOMETER_12 LITERAL1
+SENSITIVITY_MAGNETOMETER_16 LITERAL1
