@@ -4,11 +4,12 @@
   @author     David Such
   @copyright  Please see the accompanying LICENSE file
 
-  Code:        David Such
-  Version:     1.0.0
-  Date:        20/03/23
+  Code:       David Such
+  Version:    1.0.1
+  Date:       13/04/23
 
-  1.0.0     Original Release.       20/03/23
+  1.0.0   Original Release.           20/03/23
+  1.0.1   Sensor Time Stamp added     13/04/23
 
 ******************************************************************/
 
@@ -104,6 +105,7 @@ void ReefwingLSM9DS1::updateSensorData() {
     data.gx = gyr.sx;
     data.gy = gyr.sy;
     data.gz = gyr.sz; 
+    data.gTimeStamp = gyr.timeStamp;
   }
 
   if (accelAvailable()) {  
@@ -112,6 +114,7 @@ void ReefwingLSM9DS1::updateSensorData() {
     data.ax = acc.sx;
     data.ay = acc.sy;
     data.az = acc.sz;
+    data.aTimeStamp = acc.timeStamp;
   }
 
   if (magAvailable()) {  
@@ -120,6 +123,7 @@ void ReefwingLSM9DS1::updateSensorData() {
     data.mx = mag.sx;
     data.my = mag.sy;
     data.mz = mag.sz;
+    data.mTimeStamp = mag.timeStamp;
   }
 }
 
@@ -1073,6 +1077,9 @@ ScaledData ReefwingLSM9DS1::readGyro() {
   result.sy = gyr.ry * _gRes;
   result.sz = gyr.rz * _gRes;
 
+  //  Transfer time stamp of sensor reading
+  result.timeStamp = gyr.timeStamp;
+
   return result;
 }
 
@@ -1082,6 +1089,7 @@ RawData ReefwingLSM9DS1::readGyroRaw() {
 
   //  Read the six 8-bit gyro axis rate values
   readBytes(LSM9DS1AG_ADDRESS, LSM9DS1AG_OUT_X_L_G, 6, regValue);
+  gyr.timeStamp = micros();
 
   // Convert to the RAW signed 16-bit readings
   gyr.rx = (regValue[1] << 8) | regValue[0];
@@ -1108,6 +1116,9 @@ ScaledData ReefwingLSM9DS1::readAccel() {
   result.sy = acc.ry * _aRes;
   result.sz = acc.rz * _aRes;
 
+  //  Transfer time stamp of sensor reading
+  result.timeStamp = acc.timeStamp;
+
   return result;
 }
 
@@ -1117,6 +1128,7 @@ RawData ReefwingLSM9DS1::readAccelRaw() {
 
   //  Read the six 8-bit accelerometer axis values
   readBytes(LSM9DS1AG_ADDRESS, LSM9DS1AG_OUT_X_L_XL, 6, regValue);
+  acc.timeStamp = micros();
 
   // Convert to the RAW signed 16-bit readings
   acc.rx = (regValue[1] << 8) | regValue[0];
@@ -1143,6 +1155,9 @@ ScaledData ReefwingLSM9DS1::readMag() {
   result.sy = mag.ry * _mRes;
   result.sz = mag.rz * _mRes;
 
+  //  Transfer time stamp of sensor reading
+  result.timeStamp = mag.timeStamp;
+
   return result;
 }
 
@@ -1152,6 +1167,7 @@ RawData ReefwingLSM9DS1::readMagRaw() {
 
   //  Read the six 8-bit magnetometer axis values
   readBytes(LSM9DS1M_ADDRESS, LSM9DS1M_OUT_X_L_M, 6, regValue);
+  mag.timeStamp = micros();
 
   // Convert to the RAW signed 16-bit readings
   mag.rx = (regValue[1] << 8) | regValue[0];
