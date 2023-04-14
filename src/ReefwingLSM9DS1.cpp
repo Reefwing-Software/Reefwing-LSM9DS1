@@ -127,6 +127,22 @@ void ReefwingLSM9DS1::updateSensorData() {
   }
 }
 
+void ReefwingLSM9DS1::updateTempData() {
+  //  Updates the class TempData structure if data is available
+  if (tempAvailable()) {
+    uint8_t OUT_TEMP_L = readByte(LSM9DS1AG_ADDRESS, LSM9DS1AG_OUT_TEMP_L);
+    uint8_t OUT_TEMP_H = readByte(LSM9DS1AG_ADDRESS, LSM9DS1AG_OUT_TEMP_H);
+
+    //  Record Time Stamp of sensor reading
+    gyroTemp.timeStamp = micros();
+
+    uint16_t count = (OUT_TEMP_H << 8) | (OUT_TEMP_L & 0xff); 
+    int16_t val = (int16_t)count;
+
+    gyroTemp.celsius = ((float)val)/16.0f + _config.temp.offset;   // In Celsius
+  }
+}
+
 /******************************************************************
  *
  * LSM9DS1 Configuration - 

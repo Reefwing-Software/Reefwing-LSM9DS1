@@ -318,6 +318,11 @@ struct ScaledData {
   uint32_t  timeStamp;
 };
 
+struct TempData {
+  float celsius;
+  uint32_t  timeStamp;
+};
+
 struct SensorData {
   float ax, ay, az;
   float gx, gy, gz;

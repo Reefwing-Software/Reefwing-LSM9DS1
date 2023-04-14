@@ -37,6 +37,7 @@ public:
   void reset();
   bool connected();
   void updateSensorData();
+  void updateTempData();
 
   void enableLowPower(bool bitValue);
   void enableGyroSleep(bool bitValue);
@@ -94,6 +95,7 @@ public:
   int16_t twosCompToInteger(uint16_t two_compliment_val);
 
   SensorData data;
+  TempData gyroTemp;
 
 private:
   uint8_t whoAmIGyro();
