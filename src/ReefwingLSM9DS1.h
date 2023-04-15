@@ -80,6 +80,7 @@ public:
   RawData readAccelRaw();
   ScaledData readMag();
   RawData readMagRaw();
+  InertialMessage readInertial();
 
   BiasOffsets calibrateGyro(bool save = true);
   BiasOffsets calibrateGyroFIFO(bool save = true);

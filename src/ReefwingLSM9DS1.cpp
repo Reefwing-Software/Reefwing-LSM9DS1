@@ -1193,6 +1193,21 @@ RawData ReefwingLSM9DS1::readMagRaw() {
   return mag;
 }
 
+InertialMessage ReefwingLSM9DS1::readInertial() {
+  InertialMessage msg;
+  ScaledData gyr = readGyro(), acc = readAccel();
+
+  msg.gx = gyr.sx;
+  msg.gy = gyr.sy;
+  msg.gz = gyr.sz; 
+  msg.ax = acc.sx;
+  msg.ay = acc.sy;
+  msg.az = acc.sz;
+  msg.timeStamp = gyr.timeStamp;
+
+  return msg;
+}
+
 /******************************************************************
  *
  * I2C Read/Write methods - 

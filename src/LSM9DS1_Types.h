@@ -323,6 +323,12 @@ struct TempData {
   uint32_t  timeStamp;
 };
 
+struct InertialMessage {
+  float ax, ay, az;
+  float gx, gy, gz;
+  uint32_t timeStamp;
+};
+
 struct SensorData {
   float ax, ay, az;
   float gx, gy, gz;
