@@ -307,31 +307,3 @@ struct MagTestResults {
   float magdy;
   float magdz;
 };
-
-struct RawData {
-  int16_t rx, ry, rz;
-  uint32_t  timeStamp;
-};
-
-struct ScaledData {
-  float sx, sy, sz;
-  uint32_t  timeStamp;
-};
-
-struct TempData {
-  float celsius;
-  uint32_t  timeStamp;
-};
-
-struct InertialMessage {
-  float ax, ay, az;
-  float gx, gy, gz;
-  uint32_t timeStamp;
-};
-
-struct SensorData {
-  float ax, ay, az;
-  float gx, gy, gz;
-  float mx, my, mz;
-  uint32_t gTimeStamp, aTimeStamp, mTimeStamp;
-};
