@@ -5,10 +5,12 @@
   @copyright  Please see the accompanying LICENSE file
 
   Code:        David Such
-  Version:     1.0.0
-  Date:        20/03/23
+  Version:    1.0.2
+  Date:       10/06/23
 
-  1.0.0     Original Release.       20/03/23
+  1.0.0   Original Release.           20/03/23
+  1.0.1   Sensor Time Stamp added     13/04/23
+  1.0.2   IMU Calibration bug fix     10/06/23
 
 ******************************************************************/
 
