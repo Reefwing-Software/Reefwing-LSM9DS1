@@ -34,8 +34,15 @@ void setup() {
   while (!Serial);
 
   if (imu.connected()) { 
+    Serial.println("Calibrating IMU.");
     imu.start();
-    imu.calibrateGyro();
+    BiasOffsets bias = imu.calibrateGyro();
+    Serial.print("Bias Offsets x: ");
+    Serial.print(bias.x);
+    Serial.print(", y: ");
+    Serial.print(bias.y);
+    Serial.print(", z: ");
+    Serial.println(bias.z);
     delay(20);
     //  Flush first reading
     imu.readGyro();
@@ -45,7 +52,7 @@ void setup() {
   }
 
   if (useSerialMonitor) {
-    Serial.println("LSM9DS1 IMU Connected.");
+    Serial.println("\nLSM9DS1 IMU Connected.");
     Serial.println("\nDefault Gyro Configuration used:");
     Serial.println("  - Full Scale: 2000 DPS");
     Serial.println("  - Sample Rate (ODR): 119 Hz\n");

@@ -18,8 +18,8 @@
 
 #include <Arduino.h>
 #include <Wire.h>
+#include <Reefwing_imuTypes.h>
 
-#include "Reefwing_imuTypes.h"
 #include "LSM9DS1_Registers.h"
 #include "LSM9DS1_Types.h"
 
