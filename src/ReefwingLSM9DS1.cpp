@@ -761,6 +761,7 @@ BiasOffsets ReefwingLSM9DS1::calibrateGyro(bool save) {
 
 BiasOffsets ReefwingLSM9DS1::calibrateGyroFIFO(bool save) {
   BiasOffsets bias;
+  long accum_x, accum_y, accum_z;
 
   //  Turn on FIFO and set sample threshold to 32
   enableFIFO(true);
@@ -775,14 +776,14 @@ BiasOffsets ReefwingLSM9DS1::calibrateGyroFIFO(bool save) {
   for (int i = 0; i < 32; i++) {
     RawData gyr = readGyroRaw();
 
-    bias.x += gyr.rx;
-    bias.y += gyr.ry;
-    bias.z += gyr.rz;
+    accum_x += gyr.rx;
+    accum_y += gyr.ry;
+    accum_z += gyr.rz;
   }
 
-  bias.x = bias.x / 32;
-  bias.y = bias.y / 32;
-  bias.z = bias.z / 32;
+  bias.x = accum_x / 32;
+  bias.y = accum_y / 32;
+  bias.z = accum_z / 32;
 
   if (save) {  setBiasOffset(GYROSCOPE, bias);  }
   enableFIFO(false);
@@ -793,6 +794,7 @@ BiasOffsets ReefwingLSM9DS1::calibrateGyroFIFO(bool save) {
 
 BiasOffsets ReefwingLSM9DS1::calibrateAccel(bool save) {
   BiasOffsets bias;
+  long accum_x, accum_y, accum_z;
 
   //  Average 32 zero-rate (bias offset) samples
   for (int i = 0; i < 32; i++) {
@@ -802,14 +804,14 @@ BiasOffsets ReefwingLSM9DS1::calibrateAccel(bool save) {
 
     RawData acc = readAccelRaw();
 
-    bias.x += acc.rx;
-    bias.y += acc.ry;
-    bias.z += acc.rz - (int16_t)(1.0f/_aRes);
+    accum_x += acc.rx;
+    accum_y += acc.ry;
+    accum_z += acc.rz - (int16_t)(1.0f/_aRes);
   }
 
-  bias.x = bias.x / 32;
-  bias.y = bias.y / 32;
-  bias.z = bias.z / 32;
+  bias.x = accum_x / 32;
+  bias.y = accum_y / 32;
+  bias.z = accum_z / 32;
 
   if (save) {  setBiasOffset(ACCELEROMETER, bias);  }
 
@@ -818,6 +820,7 @@ BiasOffsets ReefwingLSM9DS1::calibrateAccel(bool save) {
 
 BiasOffsets ReefwingLSM9DS1::calibrateAccelFIFO(bool save) {
   BiasOffsets bias;
+  long accum_x, accum_y, accum_z;
 
   //  Turn on FIFO and set sample threshold to 32
   enableFIFO(true);
@@ -832,14 +835,14 @@ BiasOffsets ReefwingLSM9DS1::calibrateAccelFIFO(bool save) {
   for (int i = 0; i < 32; i++) {
     RawData acc = readAccelRaw();
 
-    bias.x += acc.rx;
-    bias.y += acc.ry;
-    bias.z += acc.rz - (int16_t)(1.0f/_aRes);
+    accum_x += acc.rx;
+    accum_y += acc.ry;
+    accum_z += acc.rz - (int16_t)(1.0f/_aRes);
   }
 
-  bias.x = bias.x / 32;
-  bias.y = bias.y / 32;
-  bias.z = bias.z / 32;
+  bias.x = accum_x / 32;
+  bias.y = accum_y / 32;
+  bias.z = accum_z / 32;
 
   if (save) {  setBiasOffset(ACCELEROMETER, bias);  }
   enableFIFO(false);
