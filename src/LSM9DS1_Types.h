@@ -5,12 +5,13 @@
   @copyright  Please see the accompanying LICENSE file
 
   Code:       David Such
-  Version:    1.0.2
-  Date:       10/06/23
+  Version:    1.0.3
+  Date:       08/12/23
 
   1.0.0   Original Release.           20/03/23
   1.0.1   Sensor Time Stamp added     13/04/23
   1.0.2   IMU Calibration bug fix     10/06/23
+  1.0.3   Fixed Type initialisation   08/12/23
 
 ******************************************************************/
 
@@ -228,7 +229,9 @@ enum SensorType {
  ******************************************************************/
 
 struct BiasOffsets {
-  int16_t x, y, z;
+  int16_t x = 0;
+  int16_t y = 0;
+  int16_t z = 0;
 };
 
 struct GyroConfig {
@@ -283,16 +286,16 @@ struct Configuration {
 };
 
 struct SelfTestResults {
-  float gyrodx;
-  float gyrody;
-  float gyrodz;
-  float accdx;
-  float accdy;
-  float accdz;
+  float gyrodx = 0.0f;
+  float gyrody = 0.0f;
+  float gyrodz = 0.0f;
+  float accdx = 0.0f;
+  float accdy = 0.0f;
+  float accdz = 0.0f;
 };
 
 struct MagTestResults {
-  float magdx;
-  float magdy;
-  float magdz;
+  float magdx = 0.0f;
+  float magdy = 0.0f;
+  float magdz = 0.0f;
 };
